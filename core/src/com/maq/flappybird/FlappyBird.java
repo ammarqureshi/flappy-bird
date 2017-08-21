@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Circle;
+import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 
 import java.util.Random;
@@ -122,12 +123,14 @@ public class FlappyBird extends ApplicationAdapter {
                     tubeX[i] -= 4;
                 }
 
+
+                //y coordinates of bottom left
                 float topTubeY = Gdx.graphics.getHeight() / 2 + gap / 2 + offset[i];
                 float bottomTubeY =  Gdx.graphics.getHeight() / 2 - gap / 2 - bottomTube.getHeight() + offset[i];
 
                 batch.draw(topTube, tubeX[i], topTubeY);
                 batch.draw(bottomTube, tubeX[i],bottomTubeY);
-                
+
                 topRectangles[i].set(tubeX[i],topTubeY, topTube.getWidth(), topTube.getHeight());
                 bottomRectangles[i].set(tubeX[i],bottomTubeY,bottomTube.getWidth(), bottomTube.getHeight());
 
@@ -182,6 +185,13 @@ public class FlappyBird extends ApplicationAdapter {
         for(int i=0;i<numberOfTubes;i++) {
             shapeRenderer.rect(topRectangles[i].x, topRectangles[i].y, topTube.getWidth(), topTube.getHeight());
             shapeRenderer.rect(bottomRectangles[i].x, bottomRectangles[i].y, bottomTube.getWidth(), bottomTube.getHeight());
+
+
+            //check if the circle(the bird) has collided with either the top or bottom tubes
+
+            if(Intersector.overlaps(circle, topRectangles[i]) || Intersector.overlaps(circle, bottomRectangles[i])){
+                Gdx.app.log("collision", "detected");
+            }
 
         }
         shapeRenderer.end();
