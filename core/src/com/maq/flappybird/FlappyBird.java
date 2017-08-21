@@ -28,6 +28,7 @@ public class FlappyBird extends ApplicationAdapter {
     int gameState = 0;
     Texture bottomTube;
     Texture topTube;
+    Texture gameOver;
     float gap = 400;
     float maxOffset;
     int numberOfTubes = 4;
@@ -54,19 +55,17 @@ public class FlappyBird extends ApplicationAdapter {
 		birds = new Texture[2];
         birds[0] = new Texture("bird.png");
         birds[1] = new Texture("bird2.png");
+        gameOver = new Texture("gameOver.png");
 
         topTube = new Texture("toptube.png");
         bottomTube = new Texture("bottomtube.png");
 
-        //initial position of the bird is in the middle
-        birdY = Gdx.graphics.getHeight()/2;
+
 
         //declare the maximum offset of the tubes so they don't get off the screen
         maxOffset = Gdx.graphics.getHeight()/2 - gap - 100;
         tubeDistance = Gdx.graphics.getWidth()/2  + 100;
         rand = new Random();
-
-
 
         circle = new Circle();
         font = new BitmapFont();
@@ -74,6 +73,20 @@ public class FlappyBird extends ApplicationAdapter {
         font.getData().scale(8);
         topRectangles = new Rectangle[numberOfTubes];
         bottomRectangles = new Rectangle[numberOfTubes];
+
+     initialize();
+
+           // tubeX[0] = Gdx.graphics.getWidth() /2 - (topTube.getWidth() /2 + Gdx.graphics.getHeight() );
+
+        //shape renderer is similar to batch, but renders shapes instead of textures
+        //need to do collision detection on shapes
+        shapeRenderer = new ShapeRenderer();
+    }
+
+
+    public void initialize(){
+        //initial position of the bird is in the middle
+        birdY = Gdx.graphics.getHeight()/2;
 
         for(int i =0;i<numberOfTubes;i++){
 
@@ -85,12 +98,13 @@ public class FlappyBird extends ApplicationAdapter {
             topRectangles[i] = new Rectangle();
             bottomRectangles[i] = new Rectangle();
         }
+    }
+    
 
-           // tubeX[0] = Gdx.graphics.getWidth() /2 - (topTube.getWidth() /2 + Gdx.graphics.getHeight() );
-
-        //shape renderer is similar to batch, but renders shapes instead of textures
-        //need to do collision detection on shapes
-        shapeRenderer = new ShapeRenderer();
+    public void reset(){
+        consecutiveTubes = 0;
+        score = 0;
+        velocity =0;
     }
 
     //the render method is a continuous loop
@@ -104,7 +118,7 @@ public class FlappyBird extends ApplicationAdapter {
         //create a gravity system
 
         //if the game has started, then the bird drops down by velocity
-        if(gameState != 0) {
+        if(gameState == 1) {
 
             //when the tube is on the left hand side of the screen, increment score
 
@@ -167,11 +181,14 @@ public class FlappyBird extends ApplicationAdapter {
                 velocity++;
                 birdY -= velocity;
             }
+            else{
+                gameState = 2;
+            }
 
 
 
         }
-        else{
+        else if(gameState == 0){
 
 
             if(Gdx.input.justTouched()){
@@ -179,6 +196,17 @@ public class FlappyBird extends ApplicationAdapter {
                 gameState = 1;
             }
 
+        }
+        else{
+
+            batch.draw(gameOver,Gdx.graphics.getWidth()/2 - gameOver.getWidth(), Gdx.graphics.getHeight()/2 - gameOver.getHeight());
+
+            if(Gdx.input.justTouched()){
+                gameState = 1;
+                initialize();
+                reset();
+
+            }
         }
 
 
@@ -216,6 +244,16 @@ public class FlappyBird extends ApplicationAdapter {
 
             if(Intersector.overlaps(circle, topRectangles[i]) || Intersector.overlaps(circle, bottomRectangles[i])){
                 Gdx.app.log("collision", "detected");
+                gameState = 2;
+
+
+                //play again
+                if(Gdx.input.justTouched()){
+                    gameState = 1;
+                    //reset the position of the bird, and the tubes
+
+                }
+
             }
 
 
