@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Circle;
+import com.badlogic.gdx.math.Rectangle;
 
 import java.util.Random;
 
@@ -33,6 +34,8 @@ public class FlappyBird extends ApplicationAdapter {
     float[] offset = new float[numberOfTubes];
     float tubeVelocity = 4;
     Circle circle;
+    Rectangle[] topRectangles;
+    Rectangle[] bottomRectangles;
     ShapeRenderer shapeRenderer;
     Random rand;
 
@@ -59,14 +62,22 @@ public class FlappyBird extends ApplicationAdapter {
         rand = new Random();
 
 
+
+        circle = new Circle();
+
+        topRectangles = new Rectangle[numberOfTubes];
+        bottomRectangles = new Rectangle[numberOfTubes];
+
         for(int i =0;i<numberOfTubes;i++){
 
             offset[i] = (rand.nextFloat() - 0.5f) * (Gdx.graphics.getHeight()  - gap - 200);
             tubeX[i] = Gdx.graphics.getWidth() /2 - (topTube.getWidth() /2 ) + (i * tubeDistance);
+
+            topRectangles[i] = new Rectangle();
+            bottomRectangles[i] = new Rectangle();
         }
 
 
-        circle = new Circle();
 
         //shape renderer is similar to batch, but renders shapes instead of textures
         //need to do collision detection on shapes
@@ -110,8 +121,19 @@ public class FlappyBird extends ApplicationAdapter {
                 else {
                     tubeX[i] -= 4;
                 }
-                batch.draw(topTube, tubeX[i], Gdx.graphics.getHeight() / 2 + gap / 2 + offset[i]);
-                batch.draw(bottomTube, tubeX[i], Gdx.graphics.getHeight() / 2 - gap / 2 - bottomTube.getHeight() + offset[i]);
+
+                float topTubeY = Gdx.graphics.getHeight() / 2 + gap / 2 + offset[i];
+                float bottomTubeY =  Gdx.graphics.getHeight() / 2 - gap / 2 - bottomTube.getHeight() + offset[i];
+
+                batch.draw(topTube, tubeX[i], topTubeY);
+                batch.draw(bottomTube, tubeX[i],bottomTubeY);
+                
+                topRectangles[i].set(tubeX[i],topTubeY, topTube.getWidth(), topTube.getHeight());
+                bottomRectangles[i].set(tubeX[i],bottomTubeY,bottomTube.getWidth(), bottomTube.getHeight());
+
+
+
+
             }
 
 
@@ -157,7 +179,11 @@ public class FlappyBird extends ApplicationAdapter {
 
         //render the shape
         shapeRenderer.circle(circle.x, circle.y, circle.radius);
+        for(int i=0;i<numberOfTubes;i++) {
+            shapeRenderer.rect(topRectangles[i].x, topRectangles[i].y, topTube.getWidth(), topTube.getHeight());
+            shapeRenderer.rect(bottomRectangles[i].x, bottomRectangles[i].y, bottomTube.getWidth(), bottomTube.getHeight());
 
+        }
         shapeRenderer.end();
 
 
