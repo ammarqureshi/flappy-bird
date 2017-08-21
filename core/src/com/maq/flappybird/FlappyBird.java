@@ -2,9 +2,12 @@ package com.maq.flappybird;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Circle;
 
 import java.util.Random;
 
@@ -24,9 +27,13 @@ public class FlappyBird extends ApplicationAdapter {
     Texture topTube;
     float gap = 400;
     float maxOffset;
-    float offset;
-    float tubeX;
+    int numberOfTubes = 4;
+    float tubeDistance;
+    float[] tubeX = new float[numberOfTubes];
+    float[] offset = new float[numberOfTubes];
     float tubeVelocity = 4;
+    Circle circle;
+    ShapeRenderer shapeRenderer;
     Random rand;
 
 
@@ -48,10 +55,22 @@ public class FlappyBird extends ApplicationAdapter {
 
         //declare the maximum offset of the tubes so they don't get off the screen
         maxOffset = Gdx.graphics.getHeight()/2 - gap - 100;
-
+        tubeDistance = Gdx.graphics.getWidth()/2 ;
         rand = new Random();
 
-        tubeX = Gdx.graphics.getWidth() /2;
+
+        for(int i =0;i<numberOfTubes;i++){
+
+            offset[i] = (rand.nextFloat() - 0.5f) * (Gdx.graphics.getHeight()  - gap - 200);
+            tubeX[i] = Gdx.graphics.getWidth() /2 - (topTube.getWidth() /2 ) + (i * tubeDistance);
+        }
+
+
+        circle = new Circle();
+
+        //shape renderer is similar to batch, but renders shapes instead of textures
+        //need to do collision detection on shapes
+        shapeRenderer = new ShapeRenderer();
     }
 
     //the render method is a continuous loop
@@ -73,16 +92,27 @@ public class FlappyBird extends ApplicationAdapter {
 
                 //move up the bird if the screen has just been touched
                 velocity = -15;
-                offset = (rand.nextFloat() - 0.5f) * (Gdx.graphics.getHeight()  - gap - 200);
-                tubeX = Gdx.graphics.getWidth() /2;
 
             }
 
+            for(int i =0;i<numberOfTubes;i++) {
 
-            tubeX -=4;
+                //check if the tube has gone off the edge of the screen
+                if(tubeX[i] < -topTube.getWidth()){
 
-            batch.draw(topTube,tubeX,   Gdx.graphics.getHeight()/2 + gap/2 + offset);
-            batch.draw(bottomTube,tubeX , Gdx.graphics.getHeight()/2 - gap/2 - bottomTube.getHeight() + offset);
+                    //shift to the right, reuse the same tubes
+                    tubeX[i] = numberOfTubes * tubeDistance;
+
+                    //new tube offsets
+                    offset[i] = (rand.nextFloat() - 0.5f) * (Gdx.graphics.getHeight()  - gap - 200);
+
+                }
+                else {
+                    tubeX[i] -= 4;
+                }
+                batch.draw(topTube, tubeX[i], Gdx.graphics.getHeight() / 2 + gap / 2 + offset[i]);
+                batch.draw(bottomTube, tubeX[i], Gdx.graphics.getHeight() / 2 - gap / 2 - bottomTube.getHeight() + offset[i]);
+            }
 
 
 
@@ -117,6 +147,19 @@ public class FlappyBird extends ApplicationAdapter {
 
         batch.draw(birds[flapState], (Gdx.graphics.getWidth() / 2) - (birds[flapState].getWidth() / 2), birdY);
         batch.end();
+
+
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        shapeRenderer.setColor(Color.RED);
+
+        //set a new location for the circle
+        circle.set(Gdx.graphics.getWidth()/2, birdY + birds[flapState].getHeight()/2, birds[flapState].getWidth() /2);
+
+        //render the shape
+        shapeRenderer.circle(circle.x, circle.y, circle.radius);
+
+        shapeRenderer.end();
+
 
     }
 	
