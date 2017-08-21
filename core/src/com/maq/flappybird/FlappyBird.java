@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Circle;
@@ -39,6 +40,9 @@ public class FlappyBird extends ApplicationAdapter {
     Rectangle[] bottomRectangles;
     ShapeRenderer shapeRenderer;
     Random rand;
+    int score = 0;
+    int consecutiveTubes = 0;
+    BitmapFont font;
 
 
 	//instantiate objects
@@ -59,26 +63,30 @@ public class FlappyBird extends ApplicationAdapter {
 
         //declare the maximum offset of the tubes so they don't get off the screen
         maxOffset = Gdx.graphics.getHeight()/2 - gap - 100;
-        tubeDistance = Gdx.graphics.getWidth()/2 ;
+        tubeDistance = Gdx.graphics.getWidth()/2  + 100;
         rand = new Random();
 
 
 
         circle = new Circle();
-
+        font = new BitmapFont();
+        font.setColor(Color.BLACK);
+        font.getData().scale(8);
         topRectangles = new Rectangle[numberOfTubes];
         bottomRectangles = new Rectangle[numberOfTubes];
 
         for(int i =0;i<numberOfTubes;i++){
 
             offset[i] = (rand.nextFloat() - 0.5f) * (Gdx.graphics.getHeight()  - gap - 200);
-            tubeX[i] = Gdx.graphics.getWidth() /2 - (topTube.getWidth() /2 ) + (i * tubeDistance);
+
+            //first tube starts at the right of the screen
+            tubeX[i] = Gdx.graphics.getWidth() /2 - topTube.getWidth() /2   + Gdx.graphics.getWidth()+ i * tubeDistance;
 
             topRectangles[i] = new Rectangle();
             bottomRectangles[i] = new Rectangle();
         }
 
-
+           // tubeX[0] = Gdx.graphics.getWidth() /2 - (topTube.getWidth() /2 + Gdx.graphics.getHeight() );
 
         //shape renderer is similar to batch, but renders shapes instead of textures
         //need to do collision detection on shapes
@@ -97,6 +105,19 @@ public class FlappyBird extends ApplicationAdapter {
 
         //if the game has started, then the bird drops down by velocity
         if(gameState != 0) {
+
+            //when the tube is on the left hand side of the screen, increment score
+
+            //simple way of keeping track of the score would be to increment the score each time a tube passes by,
+            //this means there wasn't a collision.
+            if(tubeX[consecutiveTubes] < Gdx.graphics.getWidth() /2){
+
+                score++;
+                consecutiveTubes++;
+                consecutiveTubes%=numberOfTubes;
+                Gdx.app.log("score", String.valueOf(score));
+
+            }
 
             //check if the user has clicked the screen, in which case start freefal
             if(Gdx.input.justTouched()){
@@ -171,20 +192,24 @@ public class FlappyBird extends ApplicationAdapter {
         //recalculate depending on the game state
 
         batch.draw(birds[flapState], (Gdx.graphics.getWidth() / 2) - (birds[flapState].getWidth() / 2), birdY);
-        batch.end();
 
 
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setColor(Color.RED);
+        //#comment out shapeRenderer code for debugging purposes, to see the cicles and the rectangles in red
+
+       // shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+       // shapeRenderer.setColor(Color.RED);
 
         //set a new location for the circle
         circle.set(Gdx.graphics.getWidth()/2, birdY + birds[flapState].getHeight()/2, birds[flapState].getWidth() /2);
 
+        font.draw(batch, String.valueOf(score),Gdx.graphics.getWidth() - 200,100);
+
         //render the shape
-        shapeRenderer.circle(circle.x, circle.y, circle.radius);
+        //shapeRenderer.circle(circle.x, circle.y, circle.radius);
+
         for(int i=0;i<numberOfTubes;i++) {
-            shapeRenderer.rect(topRectangles[i].x, topRectangles[i].y, topTube.getWidth(), topTube.getHeight());
-            shapeRenderer.rect(bottomRectangles[i].x, bottomRectangles[i].y, bottomTube.getWidth(), bottomTube.getHeight());
+        //    shapeRenderer.rect(topRectangles[i].x, topRectangles[i].y, topTube.getWidth(), topTube.getHeight());
+        //    shapeRenderer.rect(bottomRectangles[i].x, bottomRectangles[i].y, bottomTube.getWidth(), bottomTube.getHeight());
 
 
             //check if the circle(the bird) has collided with either the top or bottom tubes
@@ -193,9 +218,11 @@ public class FlappyBird extends ApplicationAdapter {
                 Gdx.app.log("collision", "detected");
             }
 
-        }
-        shapeRenderer.end();
 
+        }
+        //shapeRenderer.end();
+
+        batch.end();
 
     }
 	
