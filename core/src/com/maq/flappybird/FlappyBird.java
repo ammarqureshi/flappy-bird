@@ -29,7 +29,9 @@ public class FlappyBird extends ApplicationAdapter {
     Texture bottomTube;
     Texture topTube;
     Texture gameOver;
-    float gap = 400;
+    Texture playButton;
+    Texture ground;
+    float gap = 550;
     float maxOffset;
     int numberOfTubes = 4;
     float tubeDistance;
@@ -59,7 +61,8 @@ public class FlappyBird extends ApplicationAdapter {
 
         topTube = new Texture("toptube.png");
         bottomTube = new Texture("bottomtube.png");
-
+        playButton = new Texture("playButton.png");
+        ground = new Texture("ground.png");
 
 
         //declare the maximum offset of the tubes so they don't get off the screen
@@ -74,9 +77,9 @@ public class FlappyBird extends ApplicationAdapter {
         topRectangles = new Rectangle[numberOfTubes];
         bottomRectangles = new Rectangle[numberOfTubes];
 
-     initialize();
+        initialize();
 
-           // tubeX[0] = Gdx.graphics.getWidth() /2 - (topTube.getWidth() /2 + Gdx.graphics.getHeight() );
+        // tubeX[0] = Gdx.graphics.getWidth() /2 - (topTube.getWidth() /2 + Gdx.graphics.getHeight() );
 
         //shape renderer is similar to batch, but renders shapes instead of textures
         //need to do collision detection on shapes
@@ -90,7 +93,7 @@ public class FlappyBird extends ApplicationAdapter {
 
         for(int i =0;i<numberOfTubes;i++){
 
-            offset[i] = (rand.nextFloat() - 0.5f) * (Gdx.graphics.getHeight()  - gap - 200);
+            offset[i] = (rand.nextFloat() - 0.5f) * (Gdx.graphics.getHeight()  - gap - 150);
 
             //first tube starts at the right of the screen
             tubeX[i] = Gdx.graphics.getWidth() /2 - topTube.getWidth() /2   + Gdx.graphics.getWidth()+ i * tubeDistance;
@@ -99,7 +102,7 @@ public class FlappyBird extends ApplicationAdapter {
             bottomRectangles[i] = new Rectangle();
         }
     }
-    
+
 
     public void reset(){
         consecutiveTubes = 0;
@@ -161,7 +164,7 @@ public class FlappyBird extends ApplicationAdapter {
 
                 //y coordinates of bottom left
                 float topTubeY = Gdx.graphics.getHeight() / 2 + gap / 2 + offset[i];
-                float bottomTubeY =  Gdx.graphics.getHeight() / 2 - gap / 2 - bottomTube.getHeight() + offset[i];
+                float bottomTubeY =  Gdx.graphics.getHeight() / 2 - gap / 2 - bottomTube.getHeight()  + offset[i] + ground.getHeight() ;
 
                 batch.draw(topTube, tubeX[i], topTubeY);
                 batch.draw(bottomTube, tubeX[i],bottomTubeY);
@@ -188,18 +191,18 @@ public class FlappyBird extends ApplicationAdapter {
 
 
         }
-        else if(gameState == 0){
+        else if(gameState == 0 && !Gdx.input.justTouched()){
+
+            batch.draw(playButton, Gdx.graphics.getWidth()/2 - playButton.getWidth()/2, Gdx.graphics.getHeight()/2 - playButton.getHeight()/2);
 
 
-            if(Gdx.input.justTouched()){
-                Gdx.app.log("screen", "touched");
-                gameState = 1;
-            }
-
+        }
+        else if(gameState ==0 && Gdx.input.justTouched()){
+            gameState = 1;
         }
         else{
 
-            batch.draw(gameOver,Gdx.graphics.getWidth()/2 - gameOver.getWidth(), Gdx.graphics.getHeight()/2 - gameOver.getHeight());
+            batch.draw(gameOver,Gdx.graphics.getWidth()/2 - gameOver.getWidth()/2, Gdx.graphics.getHeight()/2 - gameOver.getHeight()/2);
 
             if(Gdx.input.justTouched()){
                 gameState = 1;
@@ -230,8 +233,7 @@ public class FlappyBird extends ApplicationAdapter {
         //set a new location for the circle
         circle.set(Gdx.graphics.getWidth()/2, birdY + birds[flapState].getHeight()/2, birds[flapState].getWidth() /2);
 
-        font.draw(batch, String.valueOf(score),Gdx.graphics.getWidth() - 200,100);
-
+        font.draw(batch, String.valueOf(score),0,Gdx.graphics.getHeight() - 20);
         //render the shape
         //shapeRenderer.circle(circle.x, circle.y, circle.radius);
 
@@ -259,6 +261,7 @@ public class FlappyBird extends ApplicationAdapter {
 
         }
         //shapeRenderer.end();
+        batch.draw(ground, 0,0,Gdx.graphics.getWidth(), ground.getHeight());
 
         batch.end();
 
