@@ -180,7 +180,7 @@ public class FlappyBird extends ApplicationAdapter {
 
 
             //so the bird doesn't fall off from the screen
-            if(birdY >0 || velocity <0 ) {
+            if(birdY > ground.getHeight() || velocity <0 ) {
                 velocity++;
                 birdY -= velocity;
             }
